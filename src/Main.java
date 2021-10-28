@@ -3,7 +3,7 @@ import java.awt.font.LineBreakMeasurer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * @author Esben, Marcus, Niels and Nikolai
@@ -238,10 +238,11 @@ public class Main {
         System.out.println("\nMENU 3: CREATE BILL");
         System.out.println("-------------------");
         System.out.println("1.\t Add readings to bill");
-        System.out.println("2.\t Show water meter usage");
+        System.out.println("2.\t Calculate total bill price");
         System.out.println("0.\t Go back");
 
         boolean isValidInput = false;
+        firstLoop:
         while (!isValidInput) {
             int choice = tryCatch();
             switch (choice) {
@@ -249,6 +250,7 @@ public class Main {
                     isValidInput = true;
                     break;
                 case 1:
+                {
                     showCustomers();
                     System.out.print("Enter customer ID to select customer: ");
                     int customerID = tryCatchNoText();
@@ -257,7 +259,7 @@ public class Main {
                     // Choose whether to make a new bill or add to an existing one
                     System.out.println("1.\t Create new bill");
                     System.out.println("2.\t Add to existing bill");
-                    System.out.println("3.\t Calculate price of water");
+
                     System.out.println("\n0.\t Go back");
                     int secondChoice = tryCatchNoText();
 
@@ -266,8 +268,8 @@ public class Main {
                         switch (secondChoice) {
                             case 0:
                                 isValidInput2 = true;
-                                break;
-                            case 1:
+                                break firstLoop;
+                            case 1: {
                                 DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                                 String date = df.format(LocalDateTime.now());
                                 insertBill(customerID, date);
@@ -275,36 +277,31 @@ public class Main {
                                 String data = DB.getDisplayData();
                                 data = data.replace("\n", "");
                                 billID = Integer.parseInt(data);
-                                System.out.println("bill: " + billID);
                                 isValidInput2 = true;
-                                break;
-                            case 2:
-                                DateTimeFormatter df2 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                                date = df2.format(LocalDateTime.now());
-                                selectBillID(customerID, date);
-                                data = DB.getDisplayData();
-                                data = data.replace("\n", "");
-                                if (data.equals("|ND|")) {
-                                    System.out.println("No bill for this customer. Creating bill ... ");
+                            } break;
+                            case 2: {
+                                DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                                String date = df.format(LocalDateTime.now());
+
+                                if(!ShowBillsByCustomerID(customerID)) {
+                                    System.out.println("Enter bill id of bill you want to update with a reading: ");
+                                    billID = tryCatchNoText();
+                                }
+                                else {
                                     insertBill(customerID, date);
                                     selectBillID(customerID, date);
-                                    data = DB.getDisplayData();
+                                    String data = DB.getDisplayData();
                                     data = data.replace("\n", "");
                                     billID = Integer.parseInt(data);
-                                    System.out.println("bill: " + billID);
-                                    break;
                                 }
-                                System.out.println("bill: " + billID);
                                 isValidInput2 = true;
-                                break;
+                            } break;
                         }
                     }
-                    showReadings();
-                    System.out.println("ID, Customer ID, Meter ID, Water Consumption, Date, Reader");
+                    ShowReadingsByCustomerID(customerID);
                     System.out.print("Choose meter ID: ");
                     int meterID = tryCatchNoText();
                     showReadingsByMeterID(meterID);
-                    System.out.println("ID, Customer ID, Meter ID, Water Consumption, Date, Reader");
                     System.out.print("Choose first reading: ");
                     int firstReading = tryCatchNoText();
                     System.out.print("Choose second reading: ");
@@ -313,24 +310,134 @@ public class Main {
                     DateTimeFormatter df1 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                     String date = df1.format(LocalDateTime.now());
 
-                    insertMeterUsage(meterID, billID, firstReading,secondReading, date);
+                    insertMeterUsage(meterID, billID, firstReading, secondReading, date);
                     System.out.println("Water usage added to database!");
 
 
+                    isValidInput = true;
+                } break;
+                case 2: {
+                    // Select which customer we are working with
+                    showCustomers();
+                    System.out.print("Enter customer ID to select customer: ");
+                    int customerID = tryCatchNoText();
+
+                    // Select which bill to calculate price for
+                    ShowBillsByCustomerID(customerID);
+                    System.out.print("Choose bill ID: ");
+                    int billID = tryCatchNoText();
+
+                    // Get price of each meter usage
+                    ArrayList<Integer> readingIDs = GetMeterUsagesFromBillID(billID);
+                    if(readingIDs == null) {
+                        break;
+                    }
+                    for(int i = 0; i < readingIDs.size(); i+=2) {
+                        int temp1 = readingIDs.get(i);
+                        int temp2 = readingIDs.get(i+1);
+
+                        System.out.println(temp1 + " | " + temp2);
+
+                    }
 
 
+                    // Calculate total price for all meters of the bill
 
+                    // add tax
+
+                    // add MOMS
+
+                    // Send data to bank and generate giro card
+                    System.out.println("Sending giro data to bank...!");
 
                     isValidInput = true;
-                case 2:
-                    showMeterUsage();
-                    isValidInput = true;
-                    break;
+                } break;
+
             }
         }
     }
 
+    /**
+     * Displays meter readings of a given customer ID.
+     * @param customerID The ID of the customer whos meter readings to display.
+     */
+    public static void ShowReadingsByCustomerID(int customerID) {
+        System.out.print("Showing readings table...\n");
+        System.out.println("ID | Customer ID | Meter ID | Consumption | Date | Reader");
+        DB.selectSQL("SELECT * FROM tblReadings WHERE fldCustomerID = " + customerID + ";");
+        do {
+            String data = DB.getDisplayData();
+            if (data.equals(DB.NOMOREDATA)) {
+                break;
+            }
+            else {
+                System.out.print(data);
+            }
+        } while (true);
+    }
+
+    /**
+     * Displays all bills for the given customer ID.
+     * @param customerID The customer whos bills to display.
+     */
+    public static boolean ShowBillsByCustomerID(int customerID){
+        boolean doFirstIteration = true;
+        DB.selectSQL("SELECT * FROM tblBill WHERE fldCustomerID = " + customerID + ";");
+        do {
+            String data = DB.getDisplayData();
+
+            if(data.equals("|ND|") || data.equals("")  || data.equals("\n")  || data.equals(" ")) {
+                return false;
+            }
+
+            if(doFirstIteration) {
+                System.out.print("Showing bill table...\n");
+                System.out.println("Bill ID | Customer ID | Date");
+                doFirstIteration = false;
+            }
+
+            if (data.equals(DB.NOMOREDATA)) {
+                break;
+            }
+            else {
+                System.out.print(data);
+            }
+
+
+        } while (true);
+
+        return true;
+    }
+
+    /**
+     * Gets the water meter usage measurements from the tblMeterUsage table.
+     * @param billID The billID to get usage measurements from.
+     */
+    public static ArrayList<Integer> GetMeterUsagesFromBillID(int billID) {
+        //System.out.print("Showing meter usage table...\n");
+        DB.selectSQL("SELECT fldFirstReading, fldSecondReading FROM tblMeterUsage WHERE fldBillID = " + billID + ";");
+        ArrayList<Integer> readingIDs = new ArrayList<Integer>();
+        do {
+            String data = DB.getDisplayData();
+
+            if (data.equals(DB.NOMOREDATA)) {
+                break;
+            }
+
+            data = data.replace("\n", "");
+            data = data.replace(" ", "");
+            if(data.equals("|ND|")) {
+                System.out.println("No data found, returning");
+                return null;
+            }
+            int i = Integer.parseInt(data);
+            readingIDs.add(i);
+        } while (true);
+        return readingIDs;
+    }
+
     public static void showWaterMeters(int customerID) {
+        System.out.print("Showing water meter table...\n");
         DB.selectSQL("SELECT * FROM tblWaterMeter WHERE fldCustomerID = " + customerID + ";");
         do {
             String data = DB.getDisplayData();
@@ -344,6 +451,8 @@ public class Main {
     }
 
     public static void showMeterUsage() {
+        System.out.print("Showing meter usage table...\n");
+        System.out.println("ID | Meter ID | Bill ID | First reading | Second reading | Date");
         DB.selectSQL("SELECT * FROM tblMeterUsage ;");
         do {
             String data = DB.getDisplayData();
@@ -389,12 +498,20 @@ public class Main {
     }
 
     /**
-     * methow below selects a bill ID from a customer ID
+     * Method selects a bill ID from a customer ID in the bill table
      * @param customerID
      * @param date
      */
     public static void selectBillID(int customerID, String date) {
         DB.selectSQL("SELECT fldBillID FROM tblBill WHERE fldCustomerID =" + customerID + "AND fldDate = '" + date + "';");
+    }
+
+    /**
+     * Displays all bills under a given customer ID.
+     * @param customerID The ID of the customer.
+     */
+    public static void showBillsByCustomerID(int customerID) {
+        DB.selectSQL("SELECT * FROM tblBill WHERE fldCustomerID = " + customerID + ";");
     }
 
     /**
@@ -424,6 +541,7 @@ public class Main {
      * @param customerID The customer whos readings we will get
      */
     public static void showReadings(int customerID) {
+        System.out.print("Showing readings table...\n");
         DB.selectSQL("SELECT * FROM tblReadings WHERE fldCustomerID = " + customerID + ";");
         do {
             String data = DB.getDisplayData();
@@ -437,6 +555,7 @@ public class Main {
     }
 
     public static void showReadingsByMeterID(int meterID) {
+        System.out.print("Showing readings table...\n");
         DB.selectSQL("SELECT * FROM tblReadings WHERE fldMeterID = " + meterID + ";");
         do {
             String data = DB.getDisplayData();
@@ -453,6 +572,7 @@ public class Main {
      * method below shows everything in table Customers from the database
      */
     public static void showCustomers() {
+        System.out.print("Showing customer table...\n");
         DB.selectSQL("SELECT * FROM tblCustomers");
         do {
             String data = DB.getDisplayData();
@@ -469,6 +589,7 @@ public class Main {
      * method below shows everything in table Readings from the database
      */
     public static void showReadings() {
+        System.out.print("Showing readings table...\n");
         DB.selectSQL("SELECT * FROM tblReadings");
         do {
             String data = DB.getDisplayData();
@@ -485,6 +606,7 @@ public class Main {
      * method below shows everything in table Water Meters from the database
      */
     public static void showMeter() {
+        System.out.print("Showing Water meter table...\n");
         DB.selectSQL("SELECT * FROM tblWaterMeter");
         do {
             String data = DB.getDisplayData();
@@ -547,6 +669,7 @@ public class Main {
      * method below shows everything in table Tax from the database
      */
     public static void showSegments() {
+        System.out.print("Showing tax table...\n");
         DB.selectSQL("SELECT * FROM tblTax");
         do {
             String data = DB.getDisplayData();

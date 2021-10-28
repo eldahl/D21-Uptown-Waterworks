@@ -50,8 +50,8 @@ public class DB {
             userName=props.getProperty("userName", "sa");
             password=props.getProperty("password");
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-            System.out.println("Database Ready");
-            System.out.println("localhost:" + port + " | " + databaseName + " | " + userName + ":" + password);
+            //System.out.println("Database Ready");
+            //System.out.println("localhost:" + port + " | " + databaseName + " | " + userName + ":" + password);
 
         }catch(IOException | ClassNotFoundException e){
             System.err.println(e.getMessage());
