@@ -69,12 +69,12 @@ public class Main {
             while (!isValidInput) {
                 int choice = tryCatch();
                 switch (choice) {
-                    case 0:
+                    case 0 -> {
                         isValidInput = true;
                         isFinishedWithMenu = true;
                         System.out.println("Closing system ... ");
-                        break;
-                    case 1:
+                    }
+                    case 1 -> {
                         showCustomers();
                         System.out.println("Enter customer ID");
                         int fldCustomerID = tryCatchNoText();
@@ -87,15 +87,14 @@ public class Main {
                         String fldDate = tryCatchStringNoText();
                         System.out.println("Enter name of reader");
                         String fldReader = tryCatchStringNoText();
-
                         insertReading(fldCustomerID, fldMeterID, fldWaterConsumption, fldDate, fldReader);
                         System.out.println("Reading added!");
                         isValidInput = true;
-                        break;
-                    case 2:
+                    }
+                    case 2 -> {
                         showReadings();
                         isValidInput = true;
-                        break;
+                    }
                 }
             }
         }
@@ -246,11 +245,8 @@ public class Main {
         while (!isValidInput) {
             int choice = tryCatch();
             switch (choice) {
-                case 0:
-                    isValidInput = true;
-                    break;
-                case 1:
-                {
+                case 0 -> isValidInput = true;
+                case 1 -> {
                     showCustomers();
                     System.out.print("Enter customer ID to select customer: ");
                     int customerID = tryCatchNoText();
@@ -278,16 +274,16 @@ public class Main {
                                 data = data.replace("\n", "");
                                 billID = Integer.parseInt(data);
                                 isValidInput2 = true;
-                            } break;
+                            }
+                            break;
                             case 2: {
                                 DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                                 String date = df.format(LocalDateTime.now());
 
-                                if(!ShowBillsByCustomerID(customerID)) {
+                                if (!ShowBillsByCustomerID(customerID)) {
                                     System.out.println("Enter bill id of bill you want to update with a reading: ");
                                     billID = tryCatchNoText();
-                                }
-                                else {
+                                } else {
                                     insertBill(customerID, date);
                                     selectBillID(customerID, date);
                                     String data = DB.getDisplayData();
@@ -295,7 +291,8 @@ public class Main {
                                     billID = Integer.parseInt(data);
                                 }
                                 isValidInput2 = true;
-                            } break;
+                            }
+                            break;
                         }
                     }
                     ShowReadingsByCustomerID(customerID);
@@ -315,8 +312,8 @@ public class Main {
 
 
                     isValidInput = true;
-                } break;
-                case 2: {
+                }
+                case 2 -> {
                     // Select which customer we are working with
                     showCustomers();
                     System.out.print("Enter customer ID to select customer: ");
@@ -329,18 +326,22 @@ public class Main {
 
                     // Get price of each meter usage
                     ArrayList<Integer> readingIDs = GetMeterUsagesFromBillID(billID);
-                    if(readingIDs == null) {
+                    if (readingIDs == null) {
                         break;
                     }
-                    for(int i = 0; i < readingIDs.size(); i+=2) {
+                    for (int i = 0; i < readingIDs.size(); i += 2) {
                         MeterUsage usage = new MeterUsage();
 
                         int id1 = readingIDs.get(i);
-                        int id2 = readingIDs.get(i+1);
+                        int id2 = readingIDs.get(i + 1);
 
+                        // Water consumption
                         usage.WaterConsumption = GetWaterConsumptionByReadingIDs(id1, id2);
 
+                        // Tax
                         GetMeterTaxByReadingID(id1, usage);
+
+                        // Total price for meter usage
                         CalculateTotalPriceForMeterUsage(usage);
 
                     }
@@ -356,8 +357,7 @@ public class Main {
                     System.out.println("Sending giro data to bank...!");
 
                     isValidInput = true;
-                } break;
-
+                }
             }
         }
     }
@@ -365,19 +365,16 @@ public class Main {
     public static float GetWaterConsumptionByReadingIDs(int readingID1, int readingID2) {
 
         DB.selectSQL("SELECT fldWaterConsumption FROM tblReadings WHERE fldReadingID = " + readingID1 + ";");
-        do {
-            String data = DB.getDisplayData();
-            if (data.equals(DB.NOMOREDATA)) {
-                break;
-            }
-            else {
-                System.out.print(data);
-            }
-        } while (true);
+        float consumption1 = Float.parseFloat(DB.getData());
 
-        float consumption = 0;
+        DB.selectSQL("SELECT fldWaterConsumption FROM tblReadings WHERE fldReadingID = " + readingID2 + ";");
+        float consumption2 = Float.parseFloat(DB.getData());
 
-        return consumption;
+        // DEBUG
+        //System.out.println("1: " + consumption1 + " | 2: " + consumption2 + " | diff: " + (consumption2 - consumption1));
+
+        // Get the difference between the two
+        return consumption2 - consumption1;
     }
 
     public static void CalculateTotalPriceForMeterUsage(MeterUsage usage) {
