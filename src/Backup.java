@@ -1,8 +1,3 @@
-import javax.swing.text.DateFormatter;
-import java.awt.font.LineBreakMeasurer;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 /**
@@ -10,7 +5,7 @@ import java.util.Scanner;
  * @version 0.1
  */
 
-public class Main {
+public class Backup {
 
     /** main method below contains a menu, each calling a new method
      *
@@ -193,7 +188,7 @@ public class Main {
                         System.out.print("Enter year: ");
                         int fldYear = tryCatchNoText();
                         addSegment(fldTypeName, fldFreshWaterPrice, fldFreshWaterTax,
-                        fldDrainageTax, fldYear);
+                                fldDrainageTax, fldYear);
                         System.out.println("Segment added!");
                         isValidInput = true;
                         break;
@@ -237,8 +232,7 @@ public class Main {
         Scanner in = new Scanner(System.in);
         System.out.println("\nMENU 3: CREATE BILL");
         System.out.println("-------------------");
-        System.out.println("1.\t Add readings to bill");
-        System.out.println("2.\t Show water meter usage");
+        System.out.println("1.\t Calculate price");
         System.out.println("0.\t Go back");
 
         boolean isValidInput = false;
@@ -249,204 +243,12 @@ public class Main {
                     isValidInput = true;
                     break;
                 case 1:
-                    showCustomers();
-                    System.out.print("Enter customer ID to select customer: ");
-                    int customerID = tryCatchNoText();
-                    int billID = 0;
-
-                    // Choose whether to make a new bill or add to an existing one
-                    System.out.println("1.\t Create new bill");
-                    System.out.println("2.\t Add to existing bill");
-                    System.out.println("3.\t Calculate price of water");
-                    System.out.println("\n0.\t Go back");
-                    int secondChoice = tryCatchNoText();
-
-                    boolean isValidInput2 = false;
-                    while (!isValidInput2) {
-                        switch (secondChoice) {
-                            case 0:
-                                isValidInput2 = true;
-                                break;
-                            case 1:
-                                DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                                String date = df.format(LocalDateTime.now());
-                                insertBill(customerID, date);
-                                selectBillID(customerID, date);
-                                String data = DB.getDisplayData();
-                                data = data.replace("\n", "");
-                                billID = Integer.parseInt(data);
-                                System.out.println("bill: " + billID);
-                                isValidInput2 = true;
-                                break;
-                            case 2:
-                                DateTimeFormatter df2 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                                date = df2.format(LocalDateTime.now());
-                                selectBillID(customerID, date);
-                                data = DB.getDisplayData();
-                                data = data.replace("\n", "");
-                                if (data.equals("|ND|")) {
-                                    System.out.println("No bill for this customer. Creating bill ... ");
-                                    insertBill(customerID, date);
-                                    selectBillID(customerID, date);
-                                    data = DB.getDisplayData();
-                                    data = data.replace("\n", "");
-                                    billID = Integer.parseInt(data);
-                                    System.out.println("bill: " + billID);
-                                    break;
-                                }
-                                System.out.println("bill: " + billID);
-                                isValidInput2 = true;
-                                break;
-                        }
-                    }
-                    showReadings();
-                    System.out.println("ID, Customer ID, Meter ID, Water Consumption, Date, Reader");
-                    System.out.print("Choose meter ID: ");
-                    int meterID = tryCatchNoText();
-                    showReadingsByMeterID(meterID);
-                    System.out.println("ID, Customer ID, Meter ID, Water Consumption, Date, Reader");
-                    System.out.print("Choose first reading: ");
-                    int firstReading = tryCatchNoText();
-                    System.out.print("Choose second reading: ");
-                    int secondReading = tryCatchNoText();
-
-                    DateTimeFormatter df1 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                    String date = df1.format(LocalDateTime.now());
-
-                    insertMeterUsage(meterID, billID, firstReading,secondReading, date);
-                    System.out.println("Water usage added to database!");
-
-
-
-
-
-
-                    isValidInput = true;
-                case 2:
-                    showMeterUsage();
+                    System.out.println("CALCULATE PRICE OF WATER CONSUMPTION");
+                    calculatePriceOfWaterConsumption();
                     isValidInput = true;
                     break;
             }
         }
-    }
-
-    public static void showWaterMeters(int customerID) {
-        DB.selectSQL("SELECT * FROM tblWaterMeter WHERE fldCustomerID = " + customerID + ";");
-        do {
-            String data = DB.getDisplayData();
-            if (data.equals(DB.NOMOREDATA)) {
-                break;
-            }
-            else {
-                System.out.print(data);
-            }
-        } while (true);
-    }
-
-    public static void showMeterUsage() {
-        DB.selectSQL("SELECT * FROM tblMeterUsage ;");
-        do {
-            String data = DB.getDisplayData();
-            if (data.equals(DB.NOMOREDATA)) {
-                break;
-            }
-            else {
-                System.out.print(data);
-            }
-        } while (true);
-    }
-
-    public static void calculation() {
-        int totalPrice = 0;
-        double moms = 1.25;
-        int counter = 0;
-        boolean finishedWithCustomer = false;
-        while (!finishedWithCustomer) {
-
-            showMeterUsage();
-
-            System.out.print("Enter meter usage: ");
-            int waterConsumption = tryCatchNoText();
-
-            showSegments();
-
-            System.out.print("Enter price of freshwater: ");
-            int freshWaterPrice = tryCatchNoText();
-            System.out.print("Enter tax for freshwater");
-            int freshWaterTax = tryCatchNoText();
-            System.out.print("");
-            int drainageTax = tryCatchNoText();
-
-            double priceOfWater = waterConsumption * freshWaterPrice + (waterConsumption * freshWaterTax) + (waterConsumption * drainageTax) * moms;
-
-            totalPrice += priceOfWater;
-
-            counter++;
-
-            System.out.println("Price of meter " + counter + "= " + priceOfWater);
-        }
-        System.out.print("Price to be added to girocard = " + totalPrice);
-    }
-
-    /**
-     * methow below selects a bill ID from a customer ID
-     * @param customerID
-     * @param date
-     */
-    public static void selectBillID(int customerID, String date) {
-        DB.selectSQL("SELECT fldBillID FROM tblBill WHERE fldCustomerID =" + customerID + "AND fldDate = '" + date + "';");
-    }
-
-    /**
-     *  method below inserts a bill to database and is used in billing()
-     * @param CustomerID
-     * @param date
-     */
-    public static void insertBill (int CustomerID, String date) {
-        DB.insertSQL("INSERT INTO tblBill VALUES (" + CustomerID + ",'" + date + "');");
-
-    }
-
-    /**
-     * Inserts a row of data into the tblMeterUsage table with the given data.
-     * @param meterID Water Meter ID
-     * @param billID Bill ID
-     * @param firstReading First reading
-     * @param secondReading Second reading
-     * @param date the date of the consumption measurement
-     */
-    public static void insertMeterUsage(int meterID, int billID, int firstReading, int secondReading, String date) {
-        DB.insertSQL("INSERT INTO tblMeterUsage VALUES (" + meterID + ", " + billID + ", " + firstReading + ", " + secondReading + ", '" + date + "');");
-    }
-
-    /**
-     * Fetches a list of readings for the given customer ID
-     * @param customerID The customer whos readings we will get
-     */
-    public static void showReadings(int customerID) {
-        DB.selectSQL("SELECT * FROM tblReadings WHERE fldCustomerID = " + customerID + ";");
-        do {
-            String data = DB.getDisplayData();
-            if (data.equals(DB.NOMOREDATA)) {
-                break;
-            }
-            else {
-                System.out.print(data);
-            }
-        } while (true);
-    }
-
-    public static void showReadingsByMeterID(int meterID) {
-        DB.selectSQL("SELECT * FROM tblReadings WHERE fldMeterID = " + meterID + ";");
-        do {
-            String data = DB.getDisplayData();
-            if (data.equals(DB.NOMOREDATA)) {
-                break;
-            }
-            else {
-                System.out.print(data);
-            }
-        } while (true);
     }
 
     /**
@@ -568,7 +370,7 @@ public class Main {
      * @param fldYear
      */
     public static void addSegment(String fldTypeName, double fldFreshWaterPrice, double fldFreshWaterTax,
-                              double fldDrainageTax, int fldYear) {
+                                  double fldDrainageTax, int fldYear) {
         DB.insertSQL("INSERT INTO tblTax VALUES (" + "'" + fldTypeName + "'," + fldFreshWaterPrice + "," +
                 fldFreshWaterTax + "," + fldDrainageTax + "," + fldYear + ");");
     }
@@ -580,8 +382,7 @@ public class Main {
      * @param fldDrainageTax
      * @param fldYear
      */
-    public static void updateTaxForSegment(int fldTypeID, double fldFreshWaterPrice, double fldFreshWaterTax,
-                                           double fldDrainageTax, int fldYear) {
+    public static void updateTaxForSegment(int fldTypeID, double fldFreshWaterPrice, double fldFreshWaterTax, double fldDrainageTax, int fldYear) {
         DB.updateSQL("UPDATE tblTax SET fldFreshWaterPrice = " + fldFreshWaterPrice + ", fldFreshWaterTax = " + fldFreshWaterTax +
                 ", fldDrainageTax = " + fldDrainageTax + ", fldYear = " + fldYear + " WHERE fldTypeID = " + fldTypeID +";");
 
@@ -594,6 +395,68 @@ public class Main {
     public static void deleteSegment (int fldTypeID) {
         DB.deleteSQL("DELETE FROM tblTax WHERE fldTypeID = ('" + fldTypeID + "')");
     }
+
+    /**
+     * NOT YET COMPLETED
+     */
+    public static void calculatePriceOfWaterConsumption() {
+        Scanner in = new Scanner(System.in);
+        System.out.println("Enter customer ID: ");
+        int customerID = tryCatchNoText();
+        System.out.println("Enter water consumption for previous period: ");
+        int previousWaterConsumption = tryCatchNoText();
+        System.out.println("Enter water consumption for last period: ");
+        int lastWaterConsumption = tryCatchNoText();
+
+        int waterConsumption = Math.abs(previousWaterConsumption - lastWaterConsumption);
+        double priceOfWater = 7;
+        double waterTaxHousehold = 10;
+        double waterTaxIndustry = 9;
+        double waterTaxAgriculture = 8;
+        double drainageTaxHousehold = 10;
+        double drainageTaxIndustry = 9;
+        double drainageTaxAgriculture = 8;
+        double priceOfWaterConsumption = 0;
+
+
+        boolean isValidInput = false;
+        while (!isValidInput) {
+            System.out.println("Select customer type: ");
+            System.out.println("1.\t Household");
+            System.out.println("2.\t Industry");
+            System.out.println("3.\t Agriculture");
+            System.out.println("0.\t Go back");
+
+            int customerType = tryCatchNoText();
+
+            switch (customerType) {
+                case 0:
+                    break;
+                case 1:
+                    priceOfWaterConsumption = waterConsumption * priceOfWater +
+                            (waterConsumption * waterTaxHousehold) +
+                            (waterConsumption * drainageTaxHousehold);
+                    isValidInput = true;
+                    break;
+                case 2:
+                    priceOfWaterConsumption = waterConsumption * priceOfWater +
+                            (waterConsumption * waterTaxIndustry) +
+                            (waterConsumption * drainageTaxIndustry);
+                    isValidInput = true;
+                    break;
+                case 3:
+                    priceOfWaterConsumption = waterConsumption * priceOfWater +
+                            (waterConsumption * waterTaxAgriculture) +
+                            (waterConsumption * drainageTaxAgriculture);
+                    isValidInput = true;
+                    break;
+            }
+            System.out.println("Price of water = " + priceOfWaterConsumption);
+
+            DB.insertSQL("INSERT INTO readings VALUES");
+        }
+    }
+
 
     /** method below replaces manually implementing a try catch INT
      * @return
