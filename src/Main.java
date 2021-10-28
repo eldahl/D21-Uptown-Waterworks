@@ -233,6 +233,7 @@ public class Main {
         System.out.println("\nMENU 3: CREATE BILL");
         System.out.println("-------------------");
         System.out.println("1.\t Calculate price");
+        System.out.println("2.\t Add readings to bill");
         System.out.println("0.\t Go back");
 
         boolean isValidInput = false;
@@ -247,8 +248,56 @@ public class Main {
                     calculatePriceOfWaterConsumption();
                     isValidInput = true;
                     break;
+                case 2:
+                    // Choose whether to make a new bill or add to an existing one
+                    System.out.println("Do you want to add to an existing bill or create a new one?");
+
+                    // Select 2 readings to create a water meter usage
+                    showCustomers();
+                    int customerID = tryCatchNoText();
+                    showReadings(customerID);
+
+                    System.out.println("Choose first reading: ");
+                    int firstReading = tryCatchNoText();
+                    System.out.println("Choose second reading: ");
+                    int secondReading = tryCatchNoText();
+
+
+                    // Choose bill id or create a new bill and add water meter usage
+
+
+                    break;
             }
         }
+    }
+
+    /**
+     * Inserts a row of data into the tblMeterUsage table with the given data.
+     * @param meterID Water Meter ID
+     * @param billID Bill ID
+     * @param firstReading First reading
+     * @param secondReading Second reading
+     * @param date the date of the consumption measurement
+     */
+    public static void insertWaterUsage(int meterID, int billID, int firstReading, int secondReading, String date) {
+        DB.insertSQL("INSERT INTO tblWaterUsage VALUES (" + meterID + ", " + billID + ", " + firstReading + ", " + secondReading + ", '" + date + "');");
+    }
+
+    /**
+     * Fetches a list of readings for the given customer ID
+     * @param customerID The customer whos readings we will get
+     */
+    public static void showReadings(int customerID) {
+        DB.selectSQL("SELECT * FROM tblReadings WHERE fldCustomerID = " + customerID + ";");
+        do {
+            String data = DB.getDisplayData();
+            if (data.equals(DB.NOMOREDATA)) {
+                break;
+            }
+            else {
+                System.out.print(data);
+            }
+        } while (true);
     }
 
     /**
