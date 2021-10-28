@@ -1,28 +1,22 @@
-import javax.swing.*;
-import javax.swing.text.DateFormatter;
-import java.awt.font.LineBreakMeasurer;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
  * @author Esben, Marcus, Niels and Nikolai
- * @version 0.1
+ * @version 0.9
  */
 
 public class Main {
 
     /** main method below contains a menu, each calling a new method
      *
-     * @param args
+     * @param args main menu
      */
     public static void main(String[] args) {
-        Scanner in = new Scanner(System.in);
 
         // present menu and allow user to navigate
-        boolean isFinishedWithMenu = false;
-        do {
+        while (true) { // main menu must loop at all times
             System.out.println("\nUPTOWN WATERWORKS INTERNAL SYSTEM");
             System.out.println("------------------------------------");
             System.out.println("1.\t Readings");
@@ -35,27 +29,29 @@ public class Main {
 
                 int choice = tryCatch();
                 switch (choice) {
-                    case 0:
+                    case 0 -> { // exit application
+                        System.out.println("Closing application ...");
                         System.exit(1);
-                    case 1:
-                        collection();
+                    }
+                    case 1 -> {
+                        collection(); // opens new menu called "Readings"
                         isValidInput = true;
-                        break;
-                    case 2:
-                        dataManagement();
+                    }
+                    case 2 -> {
+                        dataManagement(); // opens new menu called "Data management"
                         isValidInput = true;
-                        break;
-                    case 3:
-                        billing();
+                    }
+                    case 3 -> {
+                        billing(); // opens new menu called "Create bill"
                         isValidInput = true;
-                        break;
+                    }
                 }
             }
-        } while (!isFinishedWithMenu);
+        }
     }
 
     /**
-     * method below allows the user to show readings and add new a reading
+     * method allows the user to show readings and add new a reading
      */
     public static void collection() {
         Scanner in = new Scanner(System.in);
@@ -70,12 +66,11 @@ public class Main {
             while (!isValidInput) {
                 int choice = tryCatch();
                 switch (choice) {
-                    case 0 -> {
+                    case 0 -> { // go back to main menu
                         isValidInput = true;
                         isFinishedWithMenu = true;
-                        System.out.println("Closing system ... ");
                     }
-                    case 1 -> {
+                    case 1 -> { // add a new reading
                         showCustomers();
                         System.out.println("Enter customer ID");
                         int fldCustomerID = tryCatchNoText();
@@ -90,22 +85,23 @@ public class Main {
                         String fldReader = tryCatchStringNoText();
                         insertReading(fldCustomerID, fldMeterID, fldWaterConsumption, fldDate, fldReader);
                         System.out.println("Reading added!");
+                        pressEnterKeyToContinue();
                         isValidInput = true;
                     }
-                    case 2 -> {
+                    case 2 -> { // show readings
                         showReadings();
+                        pressEnterKeyToContinue();
                         isValidInput = true;
+                        }
                     }
                 }
             }
         }
-    }
 
     /**
-     * method below manages data in the database
+     * method manages data in the database
      */
     public static void dataManagement() {
-        Scanner in = new Scanner(System.in);
         boolean isFinishedWithMenu = false;
         while (!isFinishedWithMenu) {
             System.out.println("\nMENU 2: DATA MANAGEMENT");
@@ -124,17 +120,18 @@ public class Main {
             while (!isValidInput) {
                 int choice = tryCatch();
                 switch (choice) {
-                    case 0:
+                    case 0 -> { // go back to main menu
                         isValidInput = true;
                         isFinishedWithMenu = true;
-                        break;
-                    case 1:
+                    }
+                    case 1 -> { // show customers
                         System.out.println("\nSHOW CUSTOMERS");
                         System.out.println("-------------------");
                         showCustomers();
+                        pressEnterKeyToContinue();
                         isValidInput = true;
-                        break;
-                    case 2:
+                    }
+                    case 2 -> { // add a new customer
                         System.out.println("\nADD CUSTOMER");
                         System.out.println("-------------------");
                         System.out.print("Enter name: ");
@@ -145,25 +142,27 @@ public class Main {
                         String fldPhoneNo = tryCatchStringNoText();
                         insertCustomer(fldName, fldAddress, fldPhoneNo);
                         System.out.println("Customer added!");
+                        pressEnterKeyToContinue();
                         isValidInput = true;
-                        break;
-                    case 3:
+                    }
+                    case 3 -> { // update an existing customer
                         System.out.println("\nUPDATE CUSTOMER");
                         System.out.println("-------------------");
                         showCustomers();
                         System.out.print("Enter customer ID: ");
                         int customerID = tryCatchNoText();
                         System.out.print("Enter name: ");
-                        fldName = tryCatchStringNoText();
+                        String fldName = tryCatchStringNoText();
                         System.out.print("Enter address: ");
-                        fldAddress = tryCatchStringNoText();
+                        String fldAddress = tryCatchStringNoText();
                         System.out.print("Enter phone number: ");
-                        fldPhoneNo = tryCatchStringNoText();
+                        String fldPhoneNo = tryCatchStringNoText();
                         updateCustomer(fldName, fldAddress, fldPhoneNo, customerID);
                         System.out.println("Customer updated!");
+                        pressEnterKeyToContinue();
                         isValidInput = true;
-                        break;
-                    case 4:
+                    }
+                    case 4 -> { // delete an existing customer
                         System.out.println("\nDELETE CUSTOMER");
                         System.out.println("-------------------");
                         showCustomers();
@@ -172,14 +171,15 @@ public class Main {
                         deleteCustomer(fldCustomerID);
                         System.out.println("Customer deleted!");
                         isValidInput = true;
-                        break;
-                    case 5:
+                    }
+                    case 5 -> { // show customer types and corresponding tax rates
                         System.out.println("\nSHOW SEGMENTS");
                         System.out.println("-------------------");
                         showSegments();
+                        pressEnterKeyToContinue();
                         isValidInput = true;
-                        break;
-                    case 6:
+                    }
+                    case 6 -> { // add customer type and corresponding tax rates
                         System.out.println("\nADD SEGMENT");
                         System.out.println("-------------------");
                         System.out.print("Enter type name of customer: ");
@@ -193,48 +193,50 @@ public class Main {
                         System.out.print("Enter year: ");
                         int fldYear = tryCatchNoText();
                         addSegment(fldTypeName, fldFreshWaterPrice, fldFreshWaterTax,
-                        fldDrainageTax, fldYear);
+                                fldDrainageTax, fldYear);
                         System.out.println("Segment added!");
+                        pressEnterKeyToContinue();
                         isValidInput = true;
-                        break;
-                    case 7:
+                    }
+                    case 7 -> { // update freshwater price and tax rates in tblTax
                         System.out.println("\nUPDATE TAX FOR SEGMENT");
                         System.out.println("-------------------");
                         showSegments();
                         System.out.print("Enter ID number of the type you want to change: ");
                         int fldTypeID = tryCatchNoText();
                         System.out.print("Enter new price for freshwater: ");
-                        fldFreshWaterPrice = tryCatchDoubleNoText();
+                        double fldFreshWaterPrice = tryCatchDoubleNoText();
                         System.out.print("Enter new tax for freshwater: ");
-                        fldFreshWaterTax = tryCatchDoubleNoText();
+                        double fldFreshWaterTax = tryCatchDoubleNoText();
                         System.out.print("Enter new tax for drainage: ");
-                        fldDrainageTax = tryCatchDoubleNoText();
+                        double fldDrainageTax = tryCatchDoubleNoText();
                         System.out.print("Enter year: ");
-                        fldYear = tryCatchNoText();
+                        int fldYear = tryCatchNoText();
                         updateTaxForSegment(fldTypeID, fldFreshWaterPrice, fldFreshWaterTax, fldDrainageTax, fldYear);
                         System.out.println("Segment updated!");
+                        pressEnterKeyToContinue();
                         isValidInput = true;
-                        break;
-                    case 8:
+                    }
+                    case 8 -> { // delete an existing customer type
                         System.out.println("\nDELETE SEGMENT");
                         System.out.println("-------------------");
                         showSegments();
                         System.out.print("Enter type ID to delete segment: ");
-                        fldTypeID = tryCatchNoText();
+                        int fldTypeID = tryCatchNoText();
                         deleteSegment(fldTypeID);
                         System.out.println("Segment deleted!");
+                        pressEnterKeyToContinue();
                         isValidInput = true;
-                        break;
+                    }
                 }
             }
         }
     }
 
     /**
-     *  method below takes value from database to calculates a consumption and price of water
+     *  method takes value from database to calculate a consumption and price of water
      */
     public static void billing() {
-        Scanner in = new Scanner(System.in);
         System.out.println("\nMENU 3: CREATE BILL");
         System.out.println("-------------------");
         System.out.println("1.\t Add readings to bill");
@@ -260,13 +262,11 @@ public class Main {
                     System.out.println("\n0.\t Go back");
                     int secondChoice = tryCatchNoText();
 
-                    boolean isValidInput2 = false;
-                    while (!isValidInput2) {
+                    boolean isValidInputInnerLoop = false;
+                    while (!isValidInputInnerLoop) {
                         switch (secondChoice) {
-                            case 0:
-                                isValidInput2 = true;
-                                break firstLoop;
-                            case 1: {
+                            case 0 -> { break firstLoop; }
+                            case 1 -> {
                                 DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                                 String date = df.format(LocalDateTime.now());
                                 insertBill(customerID, date);
@@ -274,10 +274,9 @@ public class Main {
                                 String data = DB.getDisplayData();
                                 data = data.replace("\n", "");
                                 billID = Integer.parseInt(data);
-                                isValidInput2 = true;
+                                isValidInputInnerLoop = true;
                             }
-                            break;
-                            case 2: {
+                            case 2 -> {
                                 DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                                 String date = df.format(LocalDateTime.now());
 
@@ -291,9 +290,8 @@ public class Main {
                                     data = data.replace("\n", "");
                                     billID = Integer.parseInt(data);
                                 }
-                                isValidInput2 = true;
+                                isValidInputInnerLoop = true;
                             }
-                            break;
                         }
                     }
                     ShowReadingsByCustomerID(customerID);
@@ -311,11 +309,9 @@ public class Main {
                     insertMeterUsage(meterID, billID, firstReading, secondReading, date);
                     System.out.println("Water usage added to database!");
 
-
                     isValidInput = true;
                 }
-                case 2 -> {
-                    // Select which customer we are working with
+                case 2 -> { // Select which customer we are working with
                     showCustomers();
                     System.out.print("Enter customer ID to select customer: ");
                     int customerID = tryCatchNoText();
@@ -359,14 +355,25 @@ public class Main {
                     System.out.println("\nTotal price for bill: " + totalPrice);
 
                     // Send data to bank and generate giro card
+                    System.out.println("Press ENTER key to send data to bank...");
+                    try {
+                        System.in.read();
+                    } catch (Exception e) {
+                    }
                     System.out.println("Sending giro data to bank...!");
-
+                    pressEnterKeyToContinue();
                     isValidInput = true;
                 }
             }
         }
     }
 
+    /**
+     * method pulls two readings from tblReadings and calculates the absolute of these values
+     * @param readingID1 first reading
+     * @param readingID2 second reading
+     * @return value for water consumption
+     */
     public static float GetWaterConsumptionByReadingIDs(int readingID1, int readingID2) {
 
         DB.selectSQL("SELECT fldWaterConsumption FROM tblReadings WHERE fldReadingID = " + readingID1 + ";");
@@ -382,6 +389,10 @@ public class Main {
         return consumption2 - consumption1;
     }
 
+    /**
+     * method calculates a total price based on single values
+     * @param usage freshwater consumption
+     */
     public static void CalculateTotalPriceForMeterUsage(MeterUsage usage) {
         double price = (usage.WaterConsumption * usage.FreshWaterPrice);
         price += (usage.FreshWaterTax * usage.WaterConsumption);
@@ -390,6 +401,11 @@ public class Main {
         usage.TotalPrice = price;
     }
 
+    /**
+     * get tax for meters by a given reading ID
+     * @param readingID needed to differentiate
+     * @param usage water consumption
+     */
     public static void GetMeterTaxByReadingID(int readingID, MeterUsage usage) {
         DB.selectSQL("SELECT fldMeterID FROM tblReadings WHERE fldReadingID = " + readingID + ";");
         int meterID = Integer.parseInt(DB.getData());
@@ -407,7 +423,7 @@ public class Main {
 
     /**
      * Displays meter readings of a given customer ID.
-     * @param customerID The ID of the customer whos meter readings to display.
+     * @param customerID The ID of the customer whose meter readings to display.
      */
     public static void ShowReadingsByCustomerID(int customerID) {
         System.out.print("Showing readings table...\n");
@@ -422,38 +438,34 @@ public class Main {
                 System.out.print(data);
             }
         } while (true);
+        System.out.println("ID | Customer ID | Meter ID | Consumption | Date | Reader");
     }
 
     /**
      * Displays all bills for the given customer ID.
-     * @param customerID The customer whos bills to display.
+     * @param customerID The customer whose bills to display.
      */
     public static boolean ShowBillsByCustomerID(int customerID){
         boolean doFirstIteration = true;
         DB.selectSQL("SELECT * FROM tblBill WHERE fldCustomerID = " + customerID + ";");
         do {
             String data = DB.getDisplayData();
-
             if(data.equals("|ND|") || data.equals("")  || data.equals("\n")  || data.equals(" ")) {
                 return false;
             }
-
             if(doFirstIteration) {
                 System.out.print("Showing bill table...\n");
                 System.out.println("Bill ID | Customer ID | Date");
                 doFirstIteration = false;
             }
-
             if (data.equals(DB.NOMOREDATA)) {
                 break;
             }
             else {
                 System.out.print(data);
+                System.out.println("Bill ID | Customer ID | Date");
             }
-
-
         } while (true);
-
         return true;
     }
 
@@ -484,6 +496,10 @@ public class Main {
         return readingIDs;
     }
 
+    /**
+     * method isn't used in current version but might be relevant later. Show meter belonging to customerID
+     * @param customerID necessary in order to isolate water meters
+     */
     public static void showWaterMeters(int customerID) {
         System.out.print("Showing water meter table...\n");
         DB.selectSQL("SELECT * FROM tblWaterMeter WHERE fldCustomerID = " + customerID + ";");
@@ -498,6 +514,9 @@ public class Main {
         } while (true);
     }
 
+    /**
+     * method isn't used in current version but might be relevant later. Shows meter usage
+     */
     public static void showMeterUsage() {
         System.out.print("Showing meter usage table...\n");
         System.out.println("ID | Meter ID | Bill ID | First reading | Second reading | Date");
@@ -513,42 +532,10 @@ public class Main {
         } while (true);
     }
 
-    public static void calculation() {
-        int totalPrice = 0;
-        double moms = 1.25;
-        int counter = 0;
-        boolean finishedWithCustomer = false;
-        while (!finishedWithCustomer) {
-
-            showMeterUsage();
-
-            System.out.print("Enter meter usage: ");
-            int waterConsumption = tryCatchNoText();
-
-            showSegments();
-
-            System.out.print("Enter price of freshwater: ");
-            int freshWaterPrice = tryCatchNoText();
-            System.out.print("Enter tax for freshwater");
-            int freshWaterTax = tryCatchNoText();
-            System.out.print("");
-            int drainageTax = tryCatchNoText();
-
-            double priceOfWater = waterConsumption * freshWaterPrice + (waterConsumption * freshWaterTax) + (waterConsumption * drainageTax) * moms;
-
-            totalPrice += priceOfWater;
-
-            counter++;
-
-            System.out.println("Price of meter " + counter + "= " + priceOfWater);
-        }
-        System.out.print("Price to be added to girocard = " + totalPrice);
-    }
-
     /**
      * Method selects a bill ID from a customer ID in the bill table
-     * @param customerID
-     * @param date
+     * @param customerID select every bill belonging to this customerID
+     * @param date which day is the bill from
      */
     public static void selectBillID(int customerID, String date) {
         DB.selectSQL("SELECT fldBillID FROM tblBill WHERE fldCustomerID =" + customerID + "AND fldDate = '" + date + "';");
@@ -563,9 +550,9 @@ public class Main {
     }
 
     /**
-     *  method below inserts a bill to database and is used in billing()
-     * @param CustomerID
-     * @param date
+     *  method inserts a bill to database and is used in billing()
+     * @param CustomerID choose which customer to add bill to
+     * @param date automatically uses the current day
      */
     public static void insertBill (int CustomerID, String date) {
         DB.insertSQL("INSERT INTO tblBill VALUES (" + CustomerID + ",'" + date + "');");
@@ -586,7 +573,7 @@ public class Main {
 
     /**
      * Fetches a list of readings for the given customer ID
-     * @param customerID The customer whos readings we will get
+     * @param customerID The customer whose readings we will get
      */
     public static void showReadings(int customerID) {
         System.out.print("Showing readings table...\n");
@@ -602,6 +589,10 @@ public class Main {
         } while (true);
     }
 
+    /**
+     * method shows every reading done in meterID chosen by user
+     * @param meterID chosen by user
+     */
     public static void showReadingsByMeterID(int meterID) {
         System.out.print("Showing readings table...\n");
         DB.selectSQL("SELECT * FROM tblReadings WHERE fldMeterID = " + meterID + ";");
@@ -617,10 +608,11 @@ public class Main {
     }
 
     /**
-     * method below shows everything in table Customers from the database
+     * method shows everything in table Customers from the database
      */
     public static void showCustomers() {
         System.out.print("Showing customer table...\n");
+        System.out.println("Customer ID | Name | Address | Phone number");
         DB.selectSQL("SELECT * FROM tblCustomers");
         do {
             String data = DB.getDisplayData();
@@ -631,6 +623,7 @@ public class Main {
                 System.out.print(data);
             }
         } while (true);
+        System.out.println("Customer ID | Name | Address | Phone number");
     }
 
     /**
@@ -638,6 +631,7 @@ public class Main {
      */
     public static void showReadings() {
         System.out.print("Showing readings table...\n");
+        System.out.println("Reading ID | Customer ID | Meter ID | Water consumption | Date | Read by");
         DB.selectSQL("SELECT * FROM tblReadings");
         do {
             String data = DB.getDisplayData();
@@ -648,6 +642,7 @@ public class Main {
                 System.out.print(data);
             }
         } while (true);
+        System.out.println("Reading ID | Customer ID | Meter ID | Water consumption | Date | Read by");
     }
 
     /**
@@ -655,6 +650,7 @@ public class Main {
      */
     public static void showMeter() {
         System.out.print("Showing Water meter table...\n");
+        System.out.println("Water meter ID | Brand | Customer ID | Tax type ID");
         DB.selectSQL("SELECT * FROM tblWaterMeter");
         do {
             String data = DB.getDisplayData();
@@ -665,15 +661,16 @@ public class Main {
                 System.out.print(data);
             }
         } while (true);
+        System.out.println("Water meter ID | Brand | Customer ID | Tax type ID");
     }
 
     /**
      * method below inserts a reading to database and is used in collection()
-     * @param fldCustomerID
-     * @param fldMeterID
-     * @param fldWaterConsumption
-     * @param fldDate
-     * @param fldReader
+     * @param fldCustomerID  needed data in order to add a new reading
+     * @param fldMeterID  needed data in order to add a new reading
+     * @param fldWaterConsumption  needed data in order to add a new reading
+     * @param fldDate  needed data in order to add a new reading
+     * @param fldReader  needed data in order to add a new reading
      */
     public static void insertReading(int fldCustomerID, int fldMeterID,
                                      int fldWaterConsumption, String fldDate, String fldReader) {
@@ -684,9 +681,9 @@ public class Main {
 
     /**
      * method below inserts a customer to database and is used in dataManagement()
-     * @param fldName
-     * @param fldAddress
-     * @param fldPhoneNo
+     * @param fldName needed data in order to add a customer row to tblCustomers
+     * @param fldAddress needed data in order to add a customer row to tblCustomers
+     * @param fldPhoneNo needed data in order to add a customer row to tblCustomers
      */
     public static void insertCustomer(String fldName, String fldAddress, String fldPhoneNo) {
 
@@ -694,11 +691,11 @@ public class Main {
     }
 
     /**
-     * methow below updates a customer in database and is used in dataManagement()
-     * @param fldName
-     * @param fldAddress
-     * @param fldPhoneNo
-     * @param customerID
+     * method updates a customer in database and is used in dataManagement()
+     * @param fldName from tblCustomer
+     * @param fldAddress from tblCustomer
+     * @param fldPhoneNo from tblCustomer
+     * @param customerID from tblCustomer
      */
     public static void updateCustomer(String fldName, String fldAddress, String fldPhoneNo, int customerID) {
         DB.updateSQL("UPDATE tblCustomers SET fldName = '" + fldName + "', fldAddress = '" + fldAddress + "', fldPhoneNo = '" + fldPhoneNo +
@@ -706,18 +703,19 @@ public class Main {
     }
 
     /**
-     * method below deletes a customer from database and is used in dataManagement()
-     * @param fldCustomerID
+     * method deletes a customer from database and is used in dataManagement()
+     * @param fldCustomerID selected from tblCustomer in order to delete corresponding row
      */
     public static void deleteCustomer(int fldCustomerID) {
         DB.deleteSQL("DELETE FROM tblCustomers WHERE fldCustomerID = ('" + fldCustomerID + "')");
     }
 
     /**
-     * method below shows everything in table Tax from the database
+     * method shows everything in table Tax from the database
      */
     public static void showSegments() {
         System.out.print("Showing tax table...\n");
+        System.out.println("Type ID | Type name | Freshwater price | Freshwater tax | Drainage tax | Year");
         DB.selectSQL("SELECT * FROM tblTax");
         do {
             String data = DB.getDisplayData();
@@ -728,15 +726,16 @@ public class Main {
                 System.out.print(data);
             }
         } while (true);
+        System.out.println("Type ID | Type name | Freshwater price | Freshwater tax | Drainage tax | Year");
     }
 
     /**
-     * method below adds a segment to database and is used in dataManagement()
-     * @param fldTypeName
-     * @param fldFreshWaterPrice
-     * @param fldFreshWaterTax
-     * @param fldDrainageTax
-     * @param fldYear
+     * method adds a segment to database and is used in dataManagement()
+     * @param fldTypeName from tblTax
+     * @param fldFreshWaterPrice from tblTax
+     * @param fldFreshWaterTax from tblTax
+     * @param fldDrainageTax from tblTax
+     * @param fldYear from tblTax
      */
     public static void addSegment(String fldTypeName, double fldFreshWaterPrice, double fldFreshWaterTax,
                               double fldDrainageTax, int fldYear) {
@@ -745,11 +744,11 @@ public class Main {
     }
 
     /**
-     * method below updates taxes for segments in database and is used in dataManagement()
-     * @param fldTypeID
-     * @param fldFreshWaterTax
-     * @param fldDrainageTax
-     * @param fldYear
+     * method updates taxes for segments in database and is used in dataManagement()
+     * @param fldTypeID from tblTax
+     * @param fldFreshWaterTax from tblTax
+     * @param fldDrainageTax from tblTax
+     * @param fldYear from tblTax
      */
     public static void updateTaxForSegment(int fldTypeID, double fldFreshWaterPrice, double fldFreshWaterTax,
                                            double fldDrainageTax, int fldYear) {
@@ -759,15 +758,15 @@ public class Main {
     }
 
     /**
-     * method below deletes a segment from database and is used in dataManagement()
-     * @param fldTypeID
+     * method deletes a segment from database and is used in dataManagement()
+     * @param fldTypeID from tblTax is selected in order to delete corresponding row
      */
     public static void deleteSegment (int fldTypeID) {
         DB.deleteSQL("DELETE FROM tblTax WHERE fldTypeID = ('" + fldTypeID + "')");
     }
 
-    /** method below replaces manually implementing a try catch INT
-     * @return
+    /** method replaces manually implementing a try catch INT
+     * @return an int input from user
      */
     public static int tryCatch() {
         Scanner in = new Scanner(System.in);
@@ -782,8 +781,8 @@ public class Main {
             }
         }
     }
-    /** method below replaces manually implementing a try catch INT with NO TEXT
-     * @return
+    /** method replaces manually implementing a try catch INT with NO TEXT
+     * @return an int input from user
      */
     public static int tryCatchNoText() {
         Scanner in = new Scanner(System.in);
@@ -797,8 +796,8 @@ public class Main {
             }
         }
     }
-    /** method below replaces manually implementing a try catch DOUBLE with NO TEXT
-     * @return
+    /** method replaces manually implementing a try catch DOUBLE with NO TEXT
+     * @return a double input from user
      */
     public static double tryCatchDoubleNoText() {
         Scanner in = new Scanner(System.in);
@@ -812,8 +811,8 @@ public class Main {
             }
         }
     }
-    /** method below replaces manually implementing a try catch STRING with NO TEXT
-     * @return
+    /** method replaces manually implementing a try catch STRING with NO TEXT
+     * @return a string input from user
      */
     public static String tryCatchStringNoText() {
         Scanner in = new Scanner(System.in);
@@ -825,6 +824,17 @@ public class Main {
             catch (Exception e) {
                 in.nextInt();
             }
+        }
+    }
+
+    /**
+     * method makes it possible to continue with the ENTER key
+     */
+    public static void pressEnterKeyToContinue() {
+        System.out.println("Press ENTER key to continue");
+        try {
+            System.in.read();
+        } catch (Exception e) {
         }
     }
 } // end of public class Main
