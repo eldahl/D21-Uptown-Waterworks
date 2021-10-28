@@ -333,10 +333,15 @@ public class Main {
                         break;
                     }
                     for(int i = 0; i < readingIDs.size(); i+=2) {
-                        int temp1 = readingIDs.get(i);
-                        int temp2 = readingIDs.get(i+1);
+                        MeterUsage usage = new MeterUsage();
 
-                        System.out.println(temp1 + " | " + temp2);
+                        int id1 = readingIDs.get(i);
+                        int id2 = readingIDs.get(i+1);
+
+                        usage.WaterConsumption = GetWaterConsumptionByReadingIDs(id1, id2);
+
+                        GetMeterTaxByReadingID(id1, usage);
+                        CalculateTotalPriceForMeterUsage(usage);
 
                     }
 
@@ -355,6 +360,32 @@ public class Main {
 
             }
         }
+    }
+
+    public static float GetWaterConsumptionByReadingIDs(int readingID1, int readingID2) {
+
+        DB.selectSQL("SELECT fldWaterConsumption FROM tblReadings WHERE fldReadingID = " + readingID1 + ";");
+        do {
+            String data = DB.getDisplayData();
+            if (data.equals(DB.NOMOREDATA)) {
+                break;
+            }
+            else {
+                System.out.print(data);
+            }
+        } while (true);
+
+        float consumption = 0;
+
+        return consumption;
+    }
+
+    public static void CalculateTotalPriceForMeterUsage(MeterUsage usage) {
+
+    }
+
+    public static void GetMeterTaxByReadingID(int readingID, MeterUsage usage) {
+
     }
 
     /**
