@@ -1,3 +1,4 @@
+import javax.swing.*;
 import javax.swing.text.DateFormatter;
 import java.awt.font.LineBreakMeasurer;
 import java.time.LocalDate;
@@ -329,6 +330,7 @@ public class Main {
                     if (readingIDs == null) {
                         break;
                     }
+                    ArrayList<MeterUsage> meterUsages = new ArrayList<MeterUsage>();
                     for (int i = 0; i < readingIDs.size(); i += 2) {
                         MeterUsage usage = new MeterUsage();
 
@@ -337,21 +339,24 @@ public class Main {
 
                         // Water consumption
                         usage.WaterConsumption = GetWaterConsumptionByReadingIDs(id1, id2);
-
                         // Tax
                         GetMeterTaxByReadingID(id1, usage);
-
                         // Total price for meter usage
                         CalculateTotalPriceForMeterUsage(usage);
-
+                        // Add to list for calculating total of all meters
+                        meterUsages.add(usage);
                     }
 
-
                     // Calculate total price for all meters of the bill
-
-                    // add tax
+                    double totalPrice = 0;
+                    for(MeterUsage mu : meterUsages) {
+                        totalPrice += mu.TotalPrice;
+                    }
 
                     // add MOMS
+                    totalPrice = totalPrice * 1.25;
+
+                    System.out.println("\nTotal price for bill: " + totalPrice);
 
                     // Send data to bank and generate giro card
                     System.out.println("Sending giro data to bank...!");
@@ -378,11 +383,26 @@ public class Main {
     }
 
     public static void CalculateTotalPriceForMeterUsage(MeterUsage usage) {
+        double price = (usage.WaterConsumption * usage.FreshWaterPrice);
+        price += (usage.FreshWaterTax * usage.WaterConsumption);
+        price += (usage.DrainageTax * usage.WaterConsumption);
 
+        usage.TotalPrice = price;
     }
 
     public static void GetMeterTaxByReadingID(int readingID, MeterUsage usage) {
+        DB.selectSQL("SELECT fldMeterID FROM tblReadings WHERE fldReadingID = " + readingID + ";");
+        int meterID = Integer.parseInt(DB.getData());
+        DB.selectSQL("SELECT fldTaxTypeID FROM tblWaterMeter WHERE fldWaterMeterID = " + meterID + ";");
+        int taxTypeID = Integer.parseInt(DB.getData());
+        DB.selectSQL("SELECT * FROM tblTax WHERE fldTypeID = " + taxTypeID + ";");
 
+        int id = Integer.parseInt(DB.getData());
+        String taxName = DB.getData().replace(" ", "");
+
+        usage.FreshWaterPrice = Float.parseFloat(DB.getData());
+        usage.FreshWaterTax = Float.parseFloat(DB.getData());
+        usage.DrainageTax = Float.parseFloat(DB.getData());
     }
 
     /**
