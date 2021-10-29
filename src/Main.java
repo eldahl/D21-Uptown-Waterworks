@@ -830,7 +830,7 @@ public class Main {
      * method makes it possible to continue with the ENTER key
      */
     public static void pressEnterKeyToContinue() {
-        System.out.println("Press any key to continue");
+        System.out.println("Press ENTER to continue");
         try {
             System.in.read();
         } catch (Exception e) {
