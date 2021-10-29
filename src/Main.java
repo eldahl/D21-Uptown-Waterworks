@@ -463,7 +463,6 @@ public class Main {
             }
             else {
                 System.out.print(data);
-                System.out.println("Bill ID | Customer ID | Date");
             }
         } while (true);
         return true;
