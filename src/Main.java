@@ -4,7 +4,7 @@ import java.util.*;
 
 /**
  * @author Esben, Marcus, Niels and Nikolai
- * @version 0.9
+ * @version 1.0
  */
 
 public class Main {
