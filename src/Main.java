@@ -369,6 +369,18 @@ public class Main {
     }
 
     /**
+     * Clears database query data so we can query again without getting errors
+     */
+    public static void ClearDBData() {
+        do {
+            String data = DB.getDisplayData();
+            if (data.equals(DB.NOMOREDATA)) {
+                break;
+            }
+        } while (true);
+    }
+
+    /**
      * method pulls two readings from tblReadings and calculates the absolute of these values
      * @param readingID1 first reading
      * @param readingID2 second reading
@@ -379,8 +391,12 @@ public class Main {
         DB.selectSQL("SELECT fldWaterConsumption FROM tblReadings WHERE fldReadingID = " + readingID1 + ";");
         float consumption1 = Float.parseFloat(DB.getData());
 
+        ClearDBData();
+
         DB.selectSQL("SELECT fldWaterConsumption FROM tblReadings WHERE fldReadingID = " + readingID2 + ";");
         float consumption2 = Float.parseFloat(DB.getData());
+
+        ClearDBData();
 
         // DEBUG
         //System.out.println("1: " + consumption1 + " | 2: " + consumption2 + " | diff: " + (consumption2 - consumption1));
@@ -409,8 +425,11 @@ public class Main {
     public static void GetMeterTaxByReadingID(int readingID, MeterUsage usage) {
         DB.selectSQL("SELECT fldMeterID FROM tblReadings WHERE fldReadingID = " + readingID + ";");
         int meterID = Integer.parseInt(DB.getData());
+        ClearDBData();
         DB.selectSQL("SELECT fldTaxTypeID FROM tblWaterMeter WHERE fldWaterMeterID = " + meterID + ";");
         int taxTypeID = Integer.parseInt(DB.getData());
+        ClearDBData();
+
         DB.selectSQL("SELECT * FROM tblTax WHERE fldTypeID = " + taxTypeID + ";");
 
         int id = Integer.parseInt(DB.getData());
@@ -419,6 +438,8 @@ public class Main {
         usage.FreshWaterPrice = Float.parseFloat(DB.getData());
         usage.FreshWaterTax = Float.parseFloat(DB.getData());
         usage.DrainageTax = Float.parseFloat(DB.getData());
+
+        ClearDBData();
     }
 
     /**
